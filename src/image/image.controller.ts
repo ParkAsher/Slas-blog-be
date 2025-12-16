@@ -21,4 +21,12 @@ export class ImageController {
     async imageUpload(@UploadedFile() image: Express.Multer.File) {
         return await this.imageService.imageUpload(image);
     }
+
+    // 썸네일 이미지 업로드
+    @UseGuards(JwtAuthGuard)
+    @Post('thumbnail/upload')
+    @UseInterceptors(FileInterceptor('thumbnail'))
+    async thumbnailUpload(@UploadedFile() thumbnail: Express.Multer.File) {
+        return await this.imageService.thumbnailUpload(thumbnail);
+    }
 }
