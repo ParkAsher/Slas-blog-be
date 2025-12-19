@@ -17,8 +17,5 @@ export async function generateSlug(title: string) {
         remove: /[*+~.()'"!:@]/g,
     });
 
-    console.log(slugifiedTitle);
-    console.log(timeStamp);
-
     return `${timeStamp}-${slugifiedTitle}`;
 }
