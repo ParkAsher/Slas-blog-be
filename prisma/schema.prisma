@@ -44,9 +44,11 @@ model Post {
     content String @db.Text
     thumbnail String?
     slug String? @unique
+    views Int @default(0)
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
+    
 
     tags PostTag[]      // Tag 테이블과 M:N 조인
 
