@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreatePostDto } from './dtos/create-post.dto';
 import { generateSlug } from 'src/utils/slug-utils';
@@ -105,5 +105,61 @@ export class PostService {
             ...post,
             tags: post.tags.map((postTag) => postTag.tag.name),
         }));
+    }
+
+    /** 글 상세 가져오기 */
+    async getPost(slug: string) {
+        const post = await this.prismaService.post.findUnique({
+            where: { slug },
+            select: {
+                id: true,
+                title: true,
+                content: true,
+                thumbnail: true,
+                slug: true,
+                views: true,
+                createdAt: true,
+                updatedAt: true,
+                author: {
+                    select: {
+                        id: true,
+                        nickname: true,
+                    },
+                },
+                tags: {
+                    select: {
+                        tag: {
+                            select: {
+                                name: true,
+                            },
+                        },
+                    },
+                },
+            },
+        });
+
+        if (!post) {
+            throw new NotFoundException('게시글을 찾을 수 없습니다.');
+        }
+
+        // 조회수 증가 (게시글이 존재할 때만)
+        await this.updateViews(slug);
+
+        return {
+            ...post,
+            tags: post.tags.map((postTag) => postTag.tag.name),
+        };
+    }
+
+    /** 글 조회수 증가 */
+    async updateViews(slug: string) {
+        return await this.prismaService.post.update({
+            where: { slug },
+            data: {
+                views: {
+                    increment: 1,
+                },
+            },
+        });
     }
 }

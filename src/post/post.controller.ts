@@ -7,6 +7,7 @@ import {
     Req,
     UseGuards,
     ParseIntPipe,
+    Param,
 } from '@nestjs/common';
 import { PostService } from './post.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
@@ -35,5 +36,11 @@ export class PostController {
         @Query('tag') tag?: string,
     ) {
         return await this.postService.getPosts(page, tag);
+    }
+
+    /** 글 상세 가져오기 */
+    @Get(':slug')
+    async getPost(@Param('slug') slug: string) {
+        return await this.postService.getPost(slug);
     }
 }
