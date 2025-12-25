@@ -169,11 +169,17 @@ export class PostService {
 
     /** 글 삭제 */
     async deletePost(slug: string, authorId: string) {
-        // 1. 게시글 찾기
+        // 1. 게시글 찾기 (태그 정보 포함)
         const post = await this.prismaService.post.findUnique({
             where: { slug },
             select: {
+                id: true,
                 authorId: true,
+                tags: {
+                    select: {
+                        tagId: true,
+                    },
+                },
             },
         });
 
@@ -187,9 +193,24 @@ export class PostService {
             throw new ForbiddenException('게시글을 삭제할 권한이 없습니다.');
         }
 
-        // 4. 삭제 (Cascade로 PostTag도 자동 삭제됨)
-        await this.prismaService.post.delete({
-            where: { slug },
+        // 4. 트랜잭션으로 게시글 삭제 및 사용되지 않는 태그 정리
+        await this.prismaService.$transaction(async (tx) => {
+            // 4-1. 게시글 삭제 (Cascade로 PostTag도 자동 삭제됨)
+            await tx.post.delete({
+                where: { slug },
+            });
+
+            // 4-2. 사용되지 않는 태그 일괄 삭제 (PostTag 연결이 없는 태그만)
+            const tagIds = post.tags.map((postTag) => postTag.tagId);
+
+            if (tagIds.length > 0) {
+                await tx.tag.deleteMany({
+                    where: {
+                        id: { in: tagIds },
+                        posts: { none: {} },
+                    },
+                });
+            }
         });
     }
 }
