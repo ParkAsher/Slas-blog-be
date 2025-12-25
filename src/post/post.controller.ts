@@ -8,6 +8,7 @@ import {
     UseGuards,
     ParseIntPipe,
     Param,
+    Delete,
 } from '@nestjs/common';
 import { PostService } from './post.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
@@ -42,5 +43,16 @@ export class PostController {
     @Get(':slug')
     async getPost(@Param('slug') slug: string) {
         return await this.postService.getPost(slug);
+    }
+
+    /** 글 삭제 */
+    @UseGuards(JwtAuthGuard)
+    @Delete(':slug')
+    async deletePost(@Param('slug') slug: string, @Req() req: Request) {
+        const authorId = req.user.sub;
+
+        await this.postService.deletePost(slug, authorId);
+
+        return { success: true };
     }
 }

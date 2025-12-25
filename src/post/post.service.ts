@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+    Injectable,
+    NotFoundException,
+    ForbiddenException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreatePostDto } from './dtos/create-post.dto';
 import { generateSlug } from 'src/utils/slug-utils';
@@ -160,6 +164,32 @@ export class PostService {
                     increment: 1,
                 },
             },
+        });
+    }
+
+    /** 글 삭제 */
+    async deletePost(slug: string, authorId: string) {
+        // 1. 게시글 찾기
+        const post = await this.prismaService.post.findUnique({
+            where: { slug },
+            select: {
+                authorId: true,
+            },
+        });
+
+        // 2. 게시글이 없으면 오류
+        if (!post) {
+            throw new NotFoundException('게시글을 찾을 수 없습니다.');
+        }
+
+        // 3. 작성자 확인
+        if (post.authorId !== authorId) {
+            throw new ForbiddenException('게시글을 삭제할 권한이 없습니다.');
+        }
+
+        // 4. 삭제 (Cascade로 PostTag도 자동 삭제됨)
+        await this.prismaService.post.delete({
+            where: { slug },
         });
     }
 }
