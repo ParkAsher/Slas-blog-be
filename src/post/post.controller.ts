@@ -9,11 +9,13 @@ import {
     ParseIntPipe,
     Param,
     Delete,
+    Put,
 } from '@nestjs/common';
 import { PostService } from './post.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { CreatePostDto } from './dtos/create-post.dto';
 import { Request } from 'express';
+import { EditPostDto } from './dtos/edit-post.dto';
 
 @Controller('post')
 export class PostController {
@@ -52,6 +54,21 @@ export class PostController {
         const authorId = req.user.sub;
 
         await this.postService.deletePost(slug, authorId);
+
+        return { success: true };
+    }
+
+    /** 글 수정 */
+    @UseGuards(JwtAuthGuard)
+    @Put(':slug')
+    async editPost(
+        @Param('slug') slug: string,
+        @Body() data: EditPostDto,
+        @Req() req: Request,
+    ) {
+        const authorId = req.user.sub;
+
+        await this.postService.editPost(slug, data, authorId);
 
         return { success: true };
     }

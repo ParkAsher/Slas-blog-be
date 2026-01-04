@@ -6,6 +6,7 @@ import {
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreatePostDto } from './dtos/create-post.dto';
 import { generateSlug } from 'src/utils/slug-utils';
+import { EditPostDto } from './dtos/edit-post.dto';
 
 @Injectable()
 export class PostService {
@@ -210,6 +211,138 @@ export class PostService {
                         posts: { none: {} },
                     },
                 });
+            }
+        });
+    }
+
+    /** 글 수정 */
+    async editPost(slug: string, data: EditPostDto, authorId: string) {
+        // 1. 게시글 찾기 (기존 태그 정보 포함)
+        const post = await this.prismaService.post.findUnique({
+            where: { slug },
+            select: {
+                id: true,
+                authorId: true,
+                title: true,
+                tags: {
+                    select: {
+                        tagId: true,
+                        tag: {
+                            select: {
+                                name: true,
+                            },
+                        },
+                    },
+                },
+            },
+        });
+
+        // 2. 게시글이 없으면 오류
+        if (!post) {
+            throw new NotFoundException('게시글을 찾을 수 없습니다.');
+        }
+
+        // 3. 작성자 확인
+        if (post.authorId !== authorId) {
+            throw new ForbiddenException('게시글을 수정할 권한이 없습니다.');
+        }
+
+        // 4. 트랜잭션으로 게시글 및 태그 수정
+        await this.prismaService.$transaction(async (tx) => {
+            // 4-1. 제목이 변경되었으면 slug 새로 생성
+            let newSlug = slug;
+            if (data.title && data.title !== post.title) {
+                newSlug = await generateSlug(data.title);
+            }
+
+            // 4-2. 제목, content, 썸네일, 슬러그 수정저장
+            const updateData: {
+                title?: string;
+                content?: string;
+                thumbnail?: string | null;
+                slug?: string;
+            } = {};
+
+            if (data.title !== undefined) {
+                updateData.title = data.title;
+            }
+            if (data.content !== undefined) {
+                updateData.content = data.content;
+            }
+            if (data.thumbnailUrl !== undefined) {
+                updateData.thumbnail = data.thumbnailUrl || null;
+            }
+            if (newSlug !== slug) {
+                updateData.slug = newSlug;
+            }
+
+            if (Object.keys(updateData).length > 0) {
+                await tx.post.update({
+                    where: { id: post.id },
+                    data: updateData,
+                });
+            }
+
+            // 4-3. 태그가 변경되었으면 기존 태그 삭제하고 새로 생성
+            if (data.tags !== undefined) {
+                // 기존 태그 이름 배열 (정렬)
+                const existingTagNames = post.tags
+                    .map((postTag) => postTag.tag.name)
+                    .sort();
+                // 새로운 태그 이름 배열 (정렬)
+                const newTagNames = [...data.tags].sort();
+
+                // 태그가 다르면 업데이트
+                const tagsChanged =
+                    existingTagNames.length !== newTagNames.length ||
+                    existingTagNames.some(
+                        (tag, index) => tag !== newTagNames[index],
+                    );
+
+                if (tagsChanged) {
+                    // 기존 태그 ID 저장 (나중에 사용되지 않는 태그 삭제용)
+                    const existingTagIds = post.tags.map(
+                        (postTag) => postTag.tagId,
+                    );
+
+                    // 기존 PostTag 연결 삭제
+                    await tx.postTag.deleteMany({
+                        where: { postId: post.id },
+                    });
+
+                    // 새로운 태그 처리 (기존 태그 찾기 또는 새로 생성)
+                    const newTagIds = await Promise.all(
+                        data.tags.map(async (tagName) => {
+                            const tag = await tx.tag.upsert({
+                                where: { name: tagName },
+                                update: {},
+                                create: { name: tagName },
+                            });
+
+                            return tag.id;
+                        }),
+                    );
+
+                    // 새로운 PostTag 연결 생성
+                    if (newTagIds.length > 0) {
+                        await tx.postTag.createMany({
+                            data: newTagIds.map((tagId) => ({
+                                postId: post.id,
+                                tagId,
+                            })),
+                        });
+                    }
+
+                    // 사용되지 않는 태그 삭제 (PostTag 연결이 없는 태그만)
+                    if (existingTagIds.length > 0) {
+                        await tx.tag.deleteMany({
+                            where: {
+                                id: { in: existingTagIds },
+                                posts: { none: {} },
+                            },
+                        });
+                    }
+                }
             }
         });
     }
