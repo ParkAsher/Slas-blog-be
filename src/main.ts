@@ -10,7 +10,7 @@ async function bootstrap() {
 
     // CORS
     app.enableCors({
-        origin: ['http://localhost:3000', 'http://192.168.45.4:3000'],
+        origin: ['http://localhost:3000', 'slas-log-fe.vercel.app'],
         credentials: true,
     });
 
