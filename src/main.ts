@@ -14,6 +14,7 @@ async function bootstrap() {
             'http://localhost:3000',
             'https://slas-log-fe.vercel.app',
             'https://www.slas.kr',
+            'https://www.slas.kr/',
         ],
         credentials: true,
     });
