@@ -32,6 +32,12 @@ export class PostController {
         return { success: true };
     }
 
+    /** 사이트맵용 글 전체 리스트 가져오기 */
+    @Get('all')
+    async getAllPosts() {
+        return await this.postService.getAllPosts();
+    }
+
     /** 글 리스트 가져오기 */
     @Get('')
     async getPosts(

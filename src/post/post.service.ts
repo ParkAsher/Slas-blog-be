@@ -56,6 +56,21 @@ export class PostService {
         });
     }
 
+    /** 사이트맵용 글 전체 리스트 가져오기 */
+    async getAllPosts() {
+        const posts = await this.prismaService.post.findMany({
+            orderBy: {
+                createdAt: 'desc',
+            },
+            select: {
+                slug: true,
+                createdAt: true,
+            },
+        });
+
+        return posts;
+    }
+
     /** 글 리스트 가져오기 */
     async getPosts(page: number, tag?: string) {
         const limit = 5;
