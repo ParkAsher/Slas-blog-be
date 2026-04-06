@@ -10,6 +10,7 @@ import { PostModule } from './post/post.module';
 import { TagModule } from './tag/tag.module';
 import { RedisModule } from './redis/redis.module';
 import { MetricsModule } from './metrics/metrics.module';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
     imports: [
@@ -24,6 +25,7 @@ import { MetricsModule } from './metrics/metrics.module';
         TagModule,
         RedisModule,
         MetricsModule,
+        AdminModule,
     ],
     controllers: [AppController],
     providers: [AppService],
