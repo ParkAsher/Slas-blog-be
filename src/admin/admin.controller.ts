@@ -15,6 +15,8 @@ import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles, Role } from '../common/decorators/roles.decorator';
 import { AdminUsersQueryDto } from './dtos/admin-users-query.dto';
 import { ChangeRoleDto } from './dtos/change-role.dto';
+import { AdminPostsQueryDto } from './dtos/admin-posts-query.dto';
+import { DeletePostsDto } from './dtos/delete-posts.dto';
 
 @Controller('admin')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -51,5 +53,23 @@ export class AdminController {
     @Delete('users/:id')
     async deactivateUser(@Param('id') userId: string, @Request() req: any) {
         return this.adminService.deactivateUser(userId, req.user.sub);
+    }
+
+    /**
+     * 게시글 목록 조회
+     * GET /admin/posts?page=1&search=keyword&type=dev
+     */
+    @Get('posts')
+    async getPosts(@Query() query: AdminPostsQueryDto) {
+        return this.adminService.getAdminPosts(query);
+    }
+
+    /**
+     * 게시글 일괄 삭제
+     * DELETE /admin/posts
+     */
+    @Delete('posts')
+    async deletePosts(@Body() dto: DeletePostsDto) {
+        return this.adminService.deletePostsByAdmin(dto);
     }
 }
