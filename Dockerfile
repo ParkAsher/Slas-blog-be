@@ -16,7 +16,7 @@ RUN npm run build
 
 FROM node:18-alpine AS prod-deps
 
-RUN apk add --no-cache python3 make g++
+RUN apk add --no-cache python3 make g++ vips-dev
 
 WORKDIR /app
 COPY package*.json ./
