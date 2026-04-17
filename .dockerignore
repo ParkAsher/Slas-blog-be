@@ -6,4 +6,3 @@ dist
 .gitignore
 .claude
 README.md
-prisma.config.ts
