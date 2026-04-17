@@ -10,8 +10,6 @@ COPY . .
 ENV DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy"
 RUN npx prisma generate
 RUN npm run build
-# 빌드 결과 확인
-RUN ls -la dist/
 
 FROM node:20 AS prod-deps
 
@@ -36,10 +34,8 @@ COPY --from=prod-deps /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/src/generated ./src/generated
+COPY --from=builder /app/dist/prisma.config.js ./prisma.config.js
 COPY package*.json ./
 
-# 복사 확인
-RUN ls -la dist/
-
 EXPOSE 3000
-CMD ["node", "dist/main"]
+CMD ["node", "dist/src/main"]
