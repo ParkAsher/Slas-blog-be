@@ -17,6 +17,10 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install --omit=dev
 
+ENV DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy"
+COPY prisma ./prisma/
+RUN npx prisma generate
+
 FROM node:20-slim
 
 RUN apt-get update && apt-get install -y \
@@ -28,7 +32,7 @@ WORKDIR /app
 COPY --from=prod-deps /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/prisma.config.ts ./
+COPY --from=builder /app/generated ./generated
 COPY package*.json ./
 
 EXPOSE 3000
