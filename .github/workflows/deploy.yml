@@ -32,7 +32,7 @@ jobs:
                   username: ${{ secrets.EC2_USER }}
                   key: ${{ secrets.EC2_SSH_KEY }}
                   script: |
-                      cd ~/blog
+                      cd ~/nnouss-be
                       docker compose pull
                       docker compose up -d
                       docker exec nestjs-app npx prisma migrate deploy
