@@ -38,5 +38,5 @@ COPY --from=builder /app/src/generated ./src/generated
 COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
 COPY package*.json ./
 
-EXPOSE 3000
+EXPOSE 8000
 CMD ["node", "dist/src/main"]

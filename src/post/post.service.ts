@@ -179,34 +179,53 @@ export class PostService {
 
     /** 글 상세 가져오기 */
     async getPost(slug: string) {
-        const post = await this.prismaService.post.findUnique({
-            where: { slug },
-            select: {
-                id: true,
-                title: true,
-                content: true,
-                thumbnail: true,
-                slug: true,
-                views: true,
-                createdAt: true,
-                updatedAt: true,
-                author: {
-                    select: {
-                        id: true,
-                        nickname: true,
-                    },
+        const SELECT_FIELDS = {
+            id: true,
+            title: true,
+            content: true,
+            thumbnail: true,
+            slug: true,
+            views: true,
+            createdAt: true,
+            updatedAt: true,
+            author: {
+                select: {
+                    id: true,
+                    nickname: true,
                 },
-                tags: {
-                    select: {
-                        tag: {
-                            select: {
-                                name: true,
-                            },
+            },
+            tags: {
+                select: {
+                    tag: {
+                        select: {
+                            name: true,
                         },
                     },
                 },
             },
+        };
+
+        // 1차 시도: 수신한 slug 그대로 조회 (정상 케이스)
+        let post = await this.prismaService.post.findUnique({
+            where: { slug },
+            select: SELECT_FIELDS,
         });
+
+        // 2차 시도: AWS ALB 이중 인코딩 케이스 처리
+        if (!post) {
+            try {
+                const decodedSlug = decodeURIComponent(slug);
+                // slug가 이미 decode된 상태였다면 중복 쿼리 방지
+                if (decodedSlug !== slug) {
+                    post = await this.prismaService.post.findUnique({
+                        where: { slug: decodedSlug },
+                        select: SELECT_FIELDS,
+                    });
+                }
+            } catch {
+                // malformed URI 무시하고 404 처리로 진행
+            }
+        }
 
         if (!post) {
             throw new NotFoundException('게시글을 찾을 수 없습니다.');

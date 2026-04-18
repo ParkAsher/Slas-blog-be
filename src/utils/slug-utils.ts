@@ -14,7 +14,8 @@ export async function generateSlug(title: string) {
         strict: false,
         locale: 'ko',
         trim: true,
-        remove: /[*+~.()'"!:@]/g,
+        // URL에서 문제가 될 수 있는 특수문자 제거
+        remove: /[*+~.()'"!:@?#%&=\[\]{}|\\^<>]/g,
     });
 
     return `${timeStamp}-${slugifiedTitle}`;
