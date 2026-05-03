@@ -21,6 +21,7 @@ async function bootstrap() {
             'http://localhost:3000',
             'https://nnouss-blog-fe.vercel.app',
             'https://nnouss.xyz',
+            'https://www.nnouss.xyz',
         ],
         credentials: true,
     });
