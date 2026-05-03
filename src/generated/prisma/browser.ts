@@ -38,11 +38,6 @@ export type Tag = Prisma.TagModel
  */
 export type PostTag = Prisma.PostTagModel
 /**
- * Model DailyTrafficStat
- * 
- */
-export type DailyTrafficStat = Prisma.DailyTrafficStatModel
-/**
  * Model Comment
  * 
  */

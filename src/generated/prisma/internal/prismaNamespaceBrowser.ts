@@ -55,7 +55,6 @@ export const ModelName = {
   Post: 'Post',
   Tag: 'Tag',
   PostTag: 'PostTag',
-  DailyTrafficStat: 'DailyTrafficStat',
   Comment: 'Comment'
 } as const
 
@@ -121,18 +120,6 @@ export const PostTagScalarFieldEnum = {
 } as const
 
 export type PostTagScalarFieldEnum = (typeof PostTagScalarFieldEnum)[keyof typeof PostTagScalarFieldEnum]
-
-
-export const DailyTrafficStatScalarFieldEnum = {
-  id: 'id',
-  date: 'date',
-  dau: 'dau',
-  pv: 'pv',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-} as const
-
-export type DailyTrafficStatScalarFieldEnum = (typeof DailyTrafficStatScalarFieldEnum)[keyof typeof DailyTrafficStatScalarFieldEnum]
 
 
 export const CommentScalarFieldEnum = {
