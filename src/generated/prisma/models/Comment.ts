@@ -723,6 +723,14 @@ export type CommentUncheckedCreateNestedManyWithoutRootInput = {
   connect?: Prisma.CommentWhereUniqueInput | Prisma.CommentWhereUniqueInput[]
 }
 
+export type IntFieldUpdateOperationsInput = {
+  set?: number
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
+}
+
 export type CommentUpdateOneWithoutChildrenNestedInput = {
   create?: Prisma.XOR<Prisma.CommentCreateWithoutChildrenInput, Prisma.CommentUncheckedCreateWithoutChildrenInput>
   connectOrCreate?: Prisma.CommentCreateOrConnectWithoutChildrenInput

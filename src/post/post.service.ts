@@ -88,7 +88,6 @@ export class PostService {
                 title: true,
                 thumbnail: true,
                 slug: true,
-                views: true,
                 createdAt: true,
                 author: {
                     select: {
@@ -145,7 +144,6 @@ export class PostService {
                 title: true,
                 thumbnail: true,
                 slug: true,
-                views: true,
                 createdAt: true,
                 author: {
                     select: {
@@ -185,7 +183,6 @@ export class PostService {
             content: true,
             thumbnail: true,
             slug: true,
-            views: true,
             createdAt: true,
             updatedAt: true,
             author: {
@@ -231,25 +228,10 @@ export class PostService {
             throw new NotFoundException('게시글을 찾을 수 없습니다.');
         }
 
-        // 조회수 증가 (게시글이 존재할 때만)
-        await this.updateViews(post.id);
-
         return {
             ...post,
             tags: post.tags.map((postTag) => postTag.tag.name),
         };
-    }
-
-    /** 글 조회수 증가 */
-    async updateViews(id: string) {
-        return await this.prismaService.post.update({
-            where: { id },
-            data: {
-                views: {
-                    increment: 1,
-                },
-            },
-        });
     }
 
     /** 글 삭제 */

@@ -185,7 +185,6 @@ export class AdminService {
                 title: true,
                 type: true,
                 slug: true,
-                views: true,
                 createdAt: true,
                 author: {
                     select: {
