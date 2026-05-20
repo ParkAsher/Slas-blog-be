@@ -1,7 +1,0 @@
-interface:
-    display_name: 'Git Commit by Scope'
-    short_description: 'Split git changes into focused commits and apply the right commit type.'
-    default_prompt: 'Use $git-commit-by-scope to inspect the current working tree, split related changes, and create commits in the format [type]: 한글 요약.'
-
-policy:
-    allow_implicit_invocation: false
